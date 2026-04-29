@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우진테크 - 제품단가표 관리 시스템</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .company-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 40px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .auth-header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .auth-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .form-link {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .form-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .form-link a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-success {
+            background: #d4f4dd;
+            color: #22863a;
+            border-left: 4px solid #22863a;
+        }
+
+        .alert-error {
+            background: #fadbd8;
+            color: #c0392b;
+            border-left: 4px solid #c0392b;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .system-container {
+            width: 100%;
+            max-width: 1400px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            height: 90vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 0 20px 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: white;
+        }
+
+        .menu-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-left-color: white;
+        }
+
+        .menu-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .menu-icon {
+            font-size: 18px;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .user-role {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .settings-btn {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+        }
+
+        .content-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .content-header-text h2 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .content-header-text p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .tab-button {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            color: #999;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+        }
+
+        .card-title {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .form-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-container.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-item label {
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="password"],
+        select,
+        textarea {
+            padding: 12px 15px;
+            border: 2px solid #e8eeff;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="password"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f4ff;
+            color: #667eea;
+            border: 1px solid #e8eeff;
+        }
+
+        .btn-secondary:hover {
+            background: #e8eeff;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ee5a52;
+        }
+
+        .btn-success {
+            background: #22863a;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #1a6228;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #f0f0f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .hidden-data {
+            color: #ccc;
+            font-style: italic;
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        .image-upload {
+            position: relative;
+            display: inline-block;
+        }
+
+        .image-preview {
+            width: 120px;
+            height: 120px;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9ff;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .image-preview:hover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-placeholder {
+            color: #999;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .modal-body {
+            padding: 25px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .image-modal-content {
+            max-width: 800px;
+            margin: 5% auto;
+        }
+
+        .image-modal-img {
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .system-container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .form-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 로그인/회원가입 페이지 -->
+<div id="authPage" class="auth-container">
+    <div class="auth-header">
+        <div class="company-logo">우</div>
+        <h1>우진테크</h1>
+        <p>제품단가표 관리 시스템</p>
+    </div>
+
+    <div id="authAlert"></div>
+
+    <!-- 로그인 폼 -->
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="loginId">아이디</label>
+            <input type="text" id="loginId" placeholder="아이디를 입력하세요" required>
+        </div>
+        <div class="form-group">
+            <label for="loginPassword">비밀번호</label>
+            <input type="password" id="loginPassword" placeholder="비밀번호를 입력하세요" required>
+        </div>
+        <button type="button" class="auth-btn" onclick="handleLogin()">로그인</button>
+        <div class="form-link">
+            계정이 없으신가요? <a onclick="switchAuthForm('signup')">회원가입</a>
+        </div>
+    </form>
+
+    <!-- 회원가입 폼 -->
+    <form id="signupForm" class="hidden">
+        <div class="form-group">
+            <label for="signupPassword">비밀번호</label>
+            <input type="password" id="signupPassword" placeholder="비밀번호를 입력하세요" required>
+        </div>
+        <div class="form-group">
+            <label for="signupPasswordConfirm">비밀번호 확인</label>
+            <input type="password" id="signupPasswordConfirm" placeholder="비밀번호를 다시 입력하세요" required>
+        </div>
+        <div class="form-group">
+            <label>자동 할당 아이디</label>
+            <div style="padding: 12px 15px; background: #f8f9ff; border: 2px solid #e8eeff; border-radius: 10px; color: #667eea; font-weight: 600;">
+                <span id="assignedUsername">guest1</span>
+            </div>
+        </div>
+        <button type="button" class="auth-btn" onclick="handleSignup()">회원가입</button>
+        <div class="form-link">
+            이미 계정이 있으신가요? <a onclick="switchAuthForm('login')">로그인</a>
+        </div>
+    </form>
+</div>
+
+<!-- 메인 시스템 -->
+<div id="systemPage" class="system-container hidden">
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">우진테크</div>
+            <div class="sidebar-subtitle">제품단가표 시스템</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item active" onclick="switchMenu('dashboard')">
+                <span class="menu-icon">📊</span>
+                <span>대시보드</span>
+            </div>
+            <div class="menu-item" onclick="switchMenu('products')">
+                <span class="menu-icon">📦</span>
+                <span>제품 관리</span>
+            </div>
+            <div class="menu-item" id="vendorMenu" onclick="switchMenu('vendors')">
+                <span class="menu-icon">🏢</span>
+                <span>업체 관리</span>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div>👤 <span id="currentUser">사용자</span></div>
+                <div class="user-role">
+                    <span id="currentRole">guest</span>
+                </div>
+            </div>
+            <button class="settings-btn" id="settingsBtn" onclick="openSettingsModal()" style="display: none;">
+                ⚙️ 설정
+            </button>
+            <button class="logout-btn" onclick="handleLogout()">로그아웃</button>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+        <!-- 대시보드 -->
+        <div id="dashboardSection" class="section">
+            <div class="content-header">
+                <div class="content-header-text">
+                    <h2>📊 대시보드</h2>
+                    <p>제품단가표 관리 시스템</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div class="card">
+                    <div style="color: #667eea; font-size: 28px; margin-bottom: 10px;">📦</div>
+                    <div class="card-title">등록된 제품</div>
+                    <div style="font-size: 32px; font-weight: bold; color: #667eea;" id="productCount">0</div>
+                </div>
+                <div class="card">
+                    <div style="color: #764ba2; font-size: 28px; margin-bottom: 10px;">🏢</div>
+                    <div class="card-title">등록된 업체</div>
+                    <div style="font-size: 32px; font-weight: bold; color: #764ba2;" id="vendorCount">0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 20px; color: #333;">최근 등록된 제품</h3>
+                <div id="recentProducts" style="max-height: 300px; overflow-y: auto;"></div>
+            </div>
+        </div>
+
+        <!-- 제품 관리 -->
+        <div id="productsSection" class="section hidden">
+            <div class="content-header">
+                <div class="content-header-text">
+                    <h2>📦 제품 관리</h2>
+                    <p>제품 정보를 등록하고 관리하세요</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" id="downloadPdfBtn" onclick="downloadProductsPDF()" style="display: none;">
+                        <span>📄</span> PDF 다운로드
+                    </button>
+                </div>
+            </div>
+
+            <div class="tab-navigation">
+                <button class="tab-button active" onclick="switchProductTab('list')">제품 목록</button>
+                <button class="tab-button" id="addProductBtn" onclick="switchProductTab('add')">제품 추가</button>
+            </div>
+
+            <div id="productListTab" class="tab-content">
+                <div id="productAlert"></div>
+                <div class="table-container">
+                    <table id="productTable">
+                        <thead>
+                            <tr>
+                                <th>업체</th>
+                                <th>품명</th>
+                                <th>이미지</th>
+                                <th>제품단가</th>
+                                <th>내림단가</th>
+                                <th>작업내용</th>
+                                <th>비고</th>
+                                <th>작업</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody">
+                        </tbody>
+                    </table>
+                    <div id="productEmpty" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">📦</div>
+                        <div class="empty-state-text">등록된 제품이 없습니다</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="productAddTab" class="tab-content hidden">
+                <div class="card">
+                    <div class="card-title">새 제품 등록</div>
+                    <form id="productForm">
+                        <div class="form-container">
+                            <div class="form-item">
+                                <label for="productVendor">업체 *</label>
+                                <select id="productVendor" required>
+                                    <option value="">선택하세요</option>
+                                </select>
+                            </div>
+                            <div class="form-item">
+                                <label for="productName">품명 *</label>
+                                <input type="text" id="productName" placeholder="제품명을 입력하세요" required>
+                            </div>
+                        </div>
+
+                        <div class="form-container">
+                            <div class="form-item">
+                                <label for="productPrice">제품단가 (원) *</label>
+                                <input type="number" id="productPrice" placeholder="0" min="0" required>
+                            </div>
+                            <div class="form-item">
+                                <label for="productDiscountPrice">내림단가 (원)</label>
+                                <input type="number" id="productDiscountPrice" placeholder="0" min="0">
+                            </div>
+                        </div>
+
+                        <div class="form-container full">
+                            <div class="form-item">
+                                <label>제품 이미지 (선택사항)</label>
+                                <div class="image-upload">
+                                    <div class="image-preview" onclick="document.getElementById('productImage').click()">
+                                        <div id="imagePlaceholder" class="image-placeholder">
+                                            <div>📷</div>
+                                            <div>클릭하여 이미지 선택</div>
+                                        </div>
+                                        <img id="imagePreview" style="display: none;">
+                                    </div>
+                                    <input type="file" id="productImage" accept="image/*" onchange="previewImage(event)">
+                                </div>
+                                <p style="font-size: 12px; color: #999; margin-top: 8px;">⚠️ 300KB 이하 크기 추천</p>
+                            </div>
+                        </div>
+
+                        <div class="form-container full">
+                            <div class="form-item">
+                                <label for="productWork">작업내용</label>
+                                <textarea id="productWork" placeholder="작업 내용을 입력하세요"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-container full">
+                            <div class="form-item">
+                                <label for="productNote">비고</label>
+                                <textarea id="productNote" placeholder="추가 사항을 입력하세요"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" class="btn btn-primary" onclick="handleAddProduct()">
+                                <span>✓</span> 제품 등록
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetProductForm()">
+                                <span>↺</span> 초기화
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 업체 관리 -->
+        <div id="vendorsSection" class="section hidden">
+            <div class="content-header">
+                <div class="content-header-text">
+                    <h2>🏢 업체 관리</h2>
+                    <p>거래 업체를 등록하고 관리하세요</p>
+                </div>
+            </div>
+
+            <div class="tab-navigation">
+                <button class="tab-button active" onclick="switchVendorTab('list')">업체 목록</button>
+                <button class="tab-button" id="addVendorBtn" onclick="switchVendorTab('add')">업체 추가</button>
+            </div>
+
+            <div id="vendorListTab" class="tab-content">
+                <div id="vendorAlert"></div>
+                <div class="table-container">
+                    <table id="vendorTable">
+                        <thead>
+                            <tr>
+                                <th>업체명</th>
+                                <th>담당자</th>
+                                <th>연락처</th>
+                                <th>이메일</th>
+                                <th>주소</th>
+                                <th>작업</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendorTableBody">
+                        </tbody>
+                    </table>
+                    <div id="vendorEmpty" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">🏢</div>
+                        <div class="empty-state-text">등록된 업체가 없습니다</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vendorAddTab" class="tab-content hidden">
+                <div class="card">
+                    <div class="card-title">새 업체 등록</div>
+                    <form id="vendorForm">
+                        <div class="form-container">
+                            <div class="form-item">
+                                <label for="vendorName">업체명 *</label>
+                                <input type="text" id="vendorName" placeholder="업체명을 입력하세요" required>
+                            </div>
+                            <div class="form-item">
+                                <label for="vendorManager">담당자</label>
+                                <input type="text" id="vendorManager" placeholder="담당자명을 입력하세요">
+                            </div>
+                        </div>
+
+                        <div class="form-container">
+                            <div class="form-item">
+                                <label for="vendorPhone">연락처</label>
+                                <input type="text" id="vendorPhone" placeholder="010-0000-0000">
+                            </div>
+                            <div class="form-item">
+                                <label for="vendorEmail">이메일</label>
+                                <input type="text" id="vendorEmail" placeholder="example@company.com">
+                            </div>
+                        </div>
+
+                        <div class="form-container full">
+                            <div class="form-item">
+                                <label for="vendorAddress">주소</label>
+                                <input type="text" id="vendorAddress" placeholder="업체 주소를 입력하세요">
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" class="btn btn-primary" onclick="handleAddVendor()">
+                                <span>✓</span> 업체 등록
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('vendorForm').reset();">
+                                <span>↺</span> 초기화
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 편집 모달 (제품) -->
+<div id="editProductModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>제품 정보 수정</h3>
+            <button class="modal-close" onclick="closeModal('editProductModal')">×</button>
+        </div>
+        <div class="modal-body">
+            <form id="editProductForm">
+                <input type="hidden" id="editProductId">
+                
+                <div class="form-item">
+                    <label for="editProductVendor">업체</label>
+                    <select id="editProductVendor" required>
+                        <option value="">선택하세요</option>
+                    </select>
+                </div>
+                
+                <div class="form-item">
+                    <label for="editProductName">품명</label>
+                    <input type="text" id="editProductName" required>
+                </div>
+
+                <div class="form-item">
+                    <label for="editProductPrice">제품단가 (원)</label>
+                    <input type="number" id="editProductPrice" min="0" required>
+                </div>
+
+                <div class="form-item">
+                    <label for="editProductDiscountPrice">내림단가 (원)</label>
+                    <input type="number" id="editProductDiscountPrice" min="0">
+                </div>
+
+                <div class="form-item">
+                    <label>제품 이미지</label>
+                    <div class="image-upload">
+                        <div class="image-preview" onclick="document.getElementById('editProductImage').click()">
+                            <div id="editImagePlaceholder" class="image-placeholder">
+                                <div>📷</div>
+                                <div>클릭하여 변경</div>
+                            </div>
+                            <img id="editImagePreview" style="display: none;">
+                        </div>
+                        <input type="file" id="editProductImage" accept="image/*" onchange="previewEditImage(event)">
+                    </div>
+                </div>
+
+                <div class="form-item">
+                    <label for="editProductWork">작업내용</label>
+                    <textarea id="editProductWork"></textarea>
+                </div>
+
+                <div class="form-item">
+                    <label for="editProductNote">비고</label>
+                    <textarea id="editProductNote"></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editProductModal')">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="handleEditProduct()">수정</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 편집 모달 (업체) -->
+<div id="editVendorModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>업체 정보 수정</h3>
+            <button class="modal-close" onclick="closeModal('editVendorModal')">×</button>
+        </div>
+        <div class="modal-body">
+            <form id="editVendorForm">
+                <input type="hidden" id="editVendorId">
+                
+                <div class="form-item">
+                    <label for="editVendorName">업체명</label>
+                    <input type="text" id="editVendorName" required>
+                </div>
+
+                <div class="form-item">
+                    <label for="editVendorManager">담당자</label>
+                    <input type="text" id="editVendorManager">
+                </div>
+
+                <div class="form-item">
+                    <label for="editVendorPhone">연락처</label>
+                    <input type="text" id="editVendorPhone">
+                </div>
+
+                <div class="form-item">
+                    <label for="editVendorEmail">이메일</label>
+                    <input type="text" id="editVendorEmail">
+                </div>
+
+                <div class="form-item">
+                    <label for="editVendorAddress">주소</label>
+                    <input type="text" id="editVendorAddress">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editVendorModal')">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="handleEditVendor()">수정</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 설정 모달 (비번 변경) -->
+<div id="settingsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>계정 설정</h3>
+            <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
+        </div>
+        <div class="modal-body">
+            <form id="settingsForm">
+                <div class="form-item">
+                    <label for="currentPassword">현재 비밀번호</label>
+                    <input type="password" id="currentPassword" placeholder="현재 비밀번호를 입력하세요" required>
+                </div>
+
+                <div class="form-item">
+                    <label for="newPassword">새 비밀번호</label>
+                    <input type="password" id="newPassword" placeholder="새 비밀번호를 입력하세요" required>
+                </div>
+
+                <div class="form-item">
+                    <label for="newPasswordConfirm">새 비밀번호 확인</label>
+                    <input type="password" id="newPasswordConfirm" placeholder="새 비밀번호를 다시 입력하세요" required>
+                </div>
+
+                <div id="settingsAlert"></div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('settingsModal')">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="handleChangePassword()">변경</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 이미지 뷰어 모달 -->
+<div id="imageViewerModal" class="modal">
+    <div class="modal-content image-modal-content">
+        <div class="modal-header">
+            <h3>제품 이미지</h3>
+            <button class="modal-close" onclick="closeModal('imageViewerModal')">×</button>
+        </div>
+        <div class="modal-body">
+            <img id="viewerImage" class="image-modal-img" alt="제품 이미지">
+        </div>
+    </div>
+</div>
+
+<script>
+    const appData = {
+        users: [
+            { id: 0, username: 'admin', password: '1234', role: 'admin' }
+        ],
+        products: [],
+        vendors: [],
+        guestCount: 0
+    };
+
+    let currentUser = null;
+    let isProcessing = false;
+
+    // ==================== 초기화 ====================
+    function initializeApp() {
+        console.log('앱 초기화 중...');
+        loadDataFromStorage();
+        checkLoginStatus();
+        updateGuestCount();
+    }
+
+    function loadDataFromStorage() {
+        try {
+            const stored = localStorage.getItem('appData');
+            if (stored) {
+                const data = JSON.parse(stored);
+                if (data.users) appData.users = [appData.users[0], ...data.users];
+                if (data.products) appData.products = data.products;
+                if (data.vendors) appData.vendors = data.vendors;
+                if (data.guestCount) appData.guestCount = data.guestCount;
+                console.log('✓ 데이터 로드 완료');
+            }
+        } catch (e) {
+            console.error('❌ 저장소 로드 오류:', e);
+        }
+    }
+
+    function saveDataToStorage() {
+        try {
+            const dataToSave = {
+                users: appData.users.filter(u => u.id > 0),
+                products: appData.products,
+                vendors: appData.vendors,
+                guestCount: appData.guestCount
+            };
+            localStorage.setItem('appData', JSON.stringify(dataToSave));
+            console.log('✓ 데이터 저장 완료');
+        } catch (e) {
+            console.error('❌ 저장 오류:', e);
+            if (e.name === 'QuotaExceededError') {
+                alert('저장소 용량 초과! 이미지를 더 작게 줄여주세요.');
+            }
+        }
+    }
+
+    function updateGuestCount() {
+        const guestUsers = appData.users.filter(u => u.role === 'guest');
+        appData.guestCount = guestUsers.length;
+    }
+
+    // ==================== 이미지 압축 ====================
+    function compressImage(file, callback) {
+        const MAX_SIZE = 300 * 1024; // 300KB
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // 큰 이미지 축소
+                if (width > height) {
+                    if (width > 600) {
+                        height = Math.round((height * 600) / width);
+                        width = 600;
+                    }
+                } else {
+                    if (height > 600) {
+                        width = Math.round((width * 600) / height);
+                        height = 600;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                let quality = 0.8;
+                let compressed = canvas.toDataURL('image/jpeg', quality);
+
+                // 용량 초과시 압축률 낮춤
+                while (compressed.length > MAX_SIZE && quality > 0.1) {
+                    quality -= 0.1;
+                    compressed = canvas.toDataURL('image/jpeg', quality);
+                }
+
+                if (compressed.length > MAX_SIZE) {
+                    alert('이미지가 너무 큽니다. 더 작은 파일을 사용해주세요.');
+                    callback(null);
+                } else {
+                    callback(compressed);
+                }
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ==================== 인증 ====================
+    function switchAuthForm(formType) {
+        document.getElementById('loginForm').classList.toggle('hidden', formType !== 'login');
+        document.getElementById('signupForm').classList.toggle('hidden', formType !== 'signup');
+        document.getElementById('authAlert').innerHTML = '';
+        
+        if (formType === 'signup') {
+            updateGuestCount();
+            const nextId = appData.guestCount + 1;
+            document.getElementById('assignedUsername').textContent = 'guest' + nextId;
+        }
+    }
+
+    function handleLogin() {
+        const id = document.getElementById('loginId').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        if (!id || !password) {
+            showAuthAlert('아이디와 비밀번호를 입력하세요', 'error');
+            return;
+        }
+
+        const user = appData.users.find(u => u.username === id && u.password === password);
+
+        if (user) {
+            console.log('✓ 로그인 성공:', user.username);
+            currentUser = user;
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            showPage('systemPage');
+            updateUIByRole();
+            updateDashboard();
+            loadProducts();
+            loadVendors();
+            updateVendorSelects();
+        } else {
+            console.log('❌ 로그인 실패');
+            showAuthAlert('아이디 또는 비밀번호가 잘못되었습니다', 'error');
+        }
+    }
+
+    function handleSignup() {
+        const password = document.getElementById('signupPassword').value;
+        const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+
+        if (!password) {
+            showAuthAlert('비밀번호를 입력하세요', 'error');
+            return;
+        }
+
+        if (password !== passwordConfirm) {
+            showAuthAlert('비밀번호가 일치하지 않습니다', 'error');
+            return;
+        }
+
+        updateGuestCount();
+        const newId = Math.max(...appData.users.map(u => u.id)) + 1;
+        const username = 'guest' + (appData.guestCount + 1);
+
+        const newUser = {
+            id: newId,
+            username: username,
+            password: password,
+            role: 'guest'
+        };
+
+        appData.users.push(newUser);
+        appData.guestCount++;
+        saveDataToStorage();
+
+        showAuthAlert('✓ 회원가입이 완료되었습니다. (아이디: ' + username + ')', 'success');
+        document.getElementById('signupForm').reset();
+        
+        setTimeout(() => {
+            switchAuthForm('login');
+            document.getElementById('loginId').value = username;
+            document.getElementById('loginId').focus();
+        }, 1500);
+    }
+
+    function handleLogout() {
+        if (confirm('로그아웃 하시겠습니까?')) {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            document.getElementById('loginForm').reset();
+            document.getElementById('signupForm').reset();
+            document.getElementById('signupForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+            showPage('authPage');
+        }
+    }
+
+    function checkLoginStatus() {
+        try {
+            const stored = localStorage.getItem('currentUser');
+            if (stored) {
+                currentUser = JSON.parse(stored);
+                console.log('✓ 자동 로그인:', currentUser.username);
+                showPage('systemPage');
+                updateUIByRole();
+                updateDashboard();
+                loadProducts();
+                loadVendors();
+                updateVendorSelects();
+            }
+        } catch (e) {
+            console.error('❌ 자동 로그인 오류:', e);
+        }
+    }
+
+    // ==================== 권한 관리 ====================
+    function updateUIByRole() {
+        const isAdmin = currentUser && currentUser.role === 'admin';
+        
+        document.getElementById('currentUser').textContent = currentUser.username;
+        document.getElementById('currentRole').textContent = isAdmin ? '👑 관리자' : '👤 게스트';
+
+        document.getElementById('vendorMenu').classList.toggle('disabled', !isAdmin);
+        document.getElementById('addProductBtn').style.display = isAdmin ? 'block' : 'none';
+        document.getElementById('addVendorBtn').style.display = isAdmin ? 'block' : 'none';
+        document.getElementById('downloadPdfBtn').style.display = isAdmin ? 'inline-flex' : 'none';
+        document.getElementById('settingsBtn').style.display = isAdmin ? 'block' : 'none';
+
+        loadProducts();
+    }
+
+    function canEditProducts() {
+        return currentUser && currentUser.role === 'admin';
+    }
+
+    function canViewPrice() {
+        return currentUser && currentUser.role === 'admin';
+    }
+
+    // ==================== 페이지 전환 ====================
+    function showPage(pageId) {
+        document.getElementById('authPage').classList.add('hidden');
+        document.getElementById('systemPage').classList.add('hidden');
+        document.getElementById(pageId).classList.remove('hidden');
+    }
+
+    function switchMenu(menuName) {
+        const isAdmin = currentUser && currentUser.role === 'admin';
+
+        if (menuName === 'vendors' && !isAdmin) {
+            showAlert('productAlert', '관리자만 접근할 수 있습니다', 'error');
+            return;
+        }
+
+        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+        event.target.closest('.menu-item').classList.add('active');
+
+        document.querySelectorAll('.section').forEach(section => section.classList.add('hidden'));
+        document.getElementById(menuName + 'Section').classList.remove('hidden');
+
+        if (menuName === 'dashboard') {
+            updateDashboard();
+        }
+    }
+
+    // ==================== 제품 관리 ====================
+    function switchProductTab(tabName) {
+        if (tabName === 'add' && !canEditProducts()) {
+            showAlert('productAlert', '관리자만 제품을 추가할 수 있습니다', 'error');
+            return;
+        }
+
+        document.querySelectorAll('#productsSection .tab-button').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        document.getElementById('productListTab').classList.add('hidden');
+        document.getElementById('productAddTab').classList.add('hidden');
+
+        if (tabName === 'list') {
+            document.getElementById('productListTab').classList.remove('hidden');
+            loadProducts();
+        } else {
+            document.getElementById('productAddTab').classList.remove('hidden');
+        }
+    }
+
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('파일 크기가 5MB를 초과합니다.');
+                return;
+            }
+            compressImage(file, function(compressed) {
+                if (compressed) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = compressed;
+                    preview.style.display = 'block';
+                    document.getElementById('imagePlaceholder').style.display = 'none';
+                }
+            });
+        }
+    }
+
+    function previewEditImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('파일 크기가 5MB를 초과합니다.');
+                return;
+            }
+            compressImage(file, function(compressed) {
+                if (compressed) {
+                    const preview = document.getElementById('editImagePreview');
+                    preview.src = compressed;
+                    preview.style.display = 'block';
+                    document.getElementById('editImagePlaceholder').style.display = 'none';
+                }
+            });
+        }
+    }
+
+    function handleAddProduct() {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        try {
+            const product = {
+                id: Date.now(),
+                name: document.getElementById('productName').value,
+                price: document.getElementById('productPrice').value,
+                discountPrice: document.getElementById('productDiscountPrice').value || '0',
+                work: document.getElementById('productWork').value,
+                note: document.getElementById('productNote').value,
+                vendor: document.getElementById('productVendor').value,
+                image: document.getElementById('imagePreview').src || null
+            };
+
+            appData.products.push(product);
+            saveDataToStorage();
+
+            console.log('✓ 제품 추가:', product.name);
+            showAlert('productAlert', '✓ 제품이 등록되었습니다', 'success');
+            resetProductForm();
+            
+            setTimeout(() => {
+                document.getElementById('productListTab').classList.remove('hidden');
+                document.getElementById('productAddTab').classList.add('hidden');
+                document.querySelectorAll('#productsSection .tab-button').forEach((btn, idx) => {
+                    btn.classList.toggle('active', idx === 0);
+                });
+                loadProducts();
+                updateDashboard();
+                isProcessing = false;
+            }, 1200);
+        } catch (e) {
+            console.error('❌ 제품 추가 오류:', e);
+            showAlert('productAlert', '제품 추가 실패: ' + e.message, 'error');
+            isProcessing = false;
+        }
+    }
+
+    function resetProductForm() {
+        document.getElementById('productForm').reset();
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('imagePlaceholder').style.display = 'block';
+        document.getElementById('productImage').value = '';
+    }
+
+    function loadProducts() {
+        const tbody = document.getElementById('productTableBody');
+        const empty = document.getElementById('productEmpty');
+        const isAdmin = canEditProducts();
+
+        tbody.innerHTML = '';
+
+        if (appData.products.length === 0) {
+            empty.style.display = 'block';
+            return;
+        }
+
+        empty.style.display = 'none';
+
+        appData.products.forEach(product => {
+            const vendorName = appData.vendors.find(v => v.id == product.vendor)?.name || '-';
+            const priceDisplay = isAdmin 
+                ? `<strong>${parseInt(product.price).toLocaleString()}원</strong>`
+                : '<div class="hidden-data">******* (숨김)</div>';
+            
+            const discountPriceDisplay = isAdmin 
+                ? `${product.discountPrice && product.discountPrice !== '0' ? parseInt(product.discountPrice).toLocaleString() + '원' : '-'}`
+                : '<div class="hidden-data">******* (숨김)</div>';
+
+            const imageCell = product.image 
+                ? `<img src="${product.image}" class="product-image" onclick="showImageViewer('${product.image}')" alt="${product.name}">`
+                : '<div style="width: 80px; height: 80px; background: #f0f4ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">없음</div>';
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${vendorName}</td>
+                <td><strong>${product.name}</strong></td>
+                <td>${imageCell}</td>
+                <td>${priceDisplay}</td>
+                <td>${discountPriceDisplay}</td>
+                <td>${product.work || '-'}</td>
+                <td>${product.note || '-'}</td>
+                <td>
+                    ${isAdmin ? `<button class="btn btn-secondary btn-small" onclick="openEditProductModal(${product.id})">수정</button>
+                    <button class="btn btn-danger btn-small" onclick="deleteProduct(${product.id})">삭제</button>` : '<span style="color: #999; font-size: 12px;">보기만</span>'}
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function showImageViewer(imageSrc) {
+        document.getElementById('viewerImage').src = imageSrc;
+        document.getElementById('imageViewerModal').style.display = 'block';
+    }
+
+    function openEditProductModal(productId) {
+        if (!canEditProducts()) return;
+
+        const product = appData.products.find(p => p.id === productId);
+        if (!product) return;
+
+        document.getElementById('editProductId').value = productId;
+        document.getElementById('editProductVendor').value = product.vendor;
+        document.getElementById('editProductName').value = product.name;
+        document.getElementById('editProductPrice').value = product.price;
+        document.getElementById('editProductDiscountPrice').value = product.discountPrice || '';
+        document.getElementById('editProductWork').value = product.work || '';
+        document.getElementById('editProductNote').value = product.note || '';
+
+        if (product.image) {
+            document.getElementById('editImagePreview').src = product.image;
+            document.getElementById('editImagePreview').style.display = 'block';
+            document.getElementById('editImagePlaceholder').style.display = 'none';
+        } else {
+            document.getElementById('editImagePreview').style.display = 'none';
+            document.getElementById('editImagePlaceholder').style.display = 'block';
+        }
+
+        document.getElementById('editProductModal').style.display = 'block';
+    }
+
+    function handleEditProduct() {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        if (!canEditProducts()) {
+            isProcessing = false;
+            return;
+        }
+
+        try {
+            const productId = parseInt(document.getElementById('editProductId').value);
+            const product = appData.products.find(p => p.id === productId);
+
+            if (product) {
+                product.vendor = document.getElementById('editProductVendor').value;
+                product.name = document.getElementById('editProductName').value;
+                product.price = document.getElementById('editProductPrice').value;
+                product.discountPrice = document.getElementById('editProductDiscountPrice').value || '0';
+                product.work = document.getElementById('editProductWork').value;
+                product.note = document.getElementById('editProductNote').value;
+                
+                const newImage = document.getElementById('editImagePreview').src;
+                if (newImage && newImage.startsWith('data:')) {
+                    product.image = newImage;
+                }
+
+                saveDataToStorage();
+                console.log('✓ 제품 수정:', product.name);
+                showAlert('productAlert', '✓ 제품이 수정되었습니다', 'success');
+                
+                setTimeout(() => {
+                    loadProducts();
+                    closeModal('editProductModal');
+                    updateDashboard();
+                    isProcessing = false;
+                }, 1000);
+            } else {
+                isProcessing = false;
+            }
+        } catch (e) {
+            console.error('❌ 수정 오류:', e);
+            showAlert('productAlert', '수정 실패: ' + e.message, 'error');
+            isProcessing = false;
+        }
+    }
+
+    function deleteProduct(productId) {
+        if (!canEditProducts() || isProcessing) return;
+
+        if (confirm('제품을 삭제하시겠습니까?')) {
+            isProcessing = true;
+            
+            try {
+                appData.products = appData.products.filter(p => p.id !== productId);
+                saveDataToStorage();
+                console.log('✓ 제품 삭제 완료');
+                showAlert('productAlert', '✓ 제품이 삭제되었습니다', 'success');
+                
+                setTimeout(() => {
+                    loadProducts();
+                    updateDashboard();
+                    isProcessing = false;
+                }, 1000);
+            } catch (e) {
+                console.error('❌ 삭제 오류:', e);
+                showAlert('productAlert', '삭제 실패: ' + e.message, 'error');
+                isProcessing = false;
+            }
+        }
+    }
+
+    // ==================== 업체 관리 ====================
+    function switchVendorTab(tabName) {
+        if (!canEditProducts()) return;
+
+        document.querySelectorAll('#vendorsSection .tab-button').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        document.getElementById('vendorListTab').classList.add('hidden');
+        document.getElementById('vendorAddTab').classList.add('hidden');
+
+        if (tabName === 'list') {
+            document.getElementById('vendorListTab').classList.remove('hidden');
+            loadVendors();
+        } else {
+            document.getElementById('vendorAddTab').classList.remove('hidden');
+        }
+    }
+
+    function handleAddVendor() {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        if (!canEditProducts()) {
+            isProcessing = false;
+            return;
+        }
+
+        try {
+            const vendor = {
+                id: Date.now(),
+                name: document.getElementById('vendorName').value,
+                manager: document.getElementById('vendorManager').value,
+                phone: document.getElementById('vendorPhone').value,
+                email: document.getElementById('vendorEmail').value,
+                address: document.getElementById('vendorAddress').value
+            };
+
+            appData.vendors.push(vendor);
+            saveDataToStorage();
+            updateVendorSelects();
+
+            console.log('✓ 업체 추가:', vendor.name);
+            showAlert('vendorAlert', '✓ 업체가 등록되었습니다', 'success');
+            document.getElementById('vendorForm').reset();
+
+            setTimeout(() => {
+                document.getElementById('vendorListTab').classList.remove('hidden');
+                document.getElementById('vendorAddTab').classList.add('hidden');
+                document.querySelectorAll('#vendorsSection .tab-button').forEach((btn, idx) => {
+                    btn.classList.toggle('active', idx === 0);
+                });
+                loadVendors();
+                updateDashboard();
+                isProcessing = false;
+            }, 1200);
+        } catch (e) {
+            console.error('❌ 업체 추가 오류:', e);
+            showAlert('vendorAlert', '업체 추가 실패: ' + e.message, 'error');
+            isProcessing = false;
+        }
+    }
+
+    function loadVendors() {
+        const tbody = document.getElementById('vendorTableBody');
+        const empty = document.getElementById('vendorEmpty');
+
+        tbody.innerHTML = '';
+
+        if (appData.vendors.length === 0) {
+            empty.style.display = 'block';
+            return;
+        }
+
+        empty.style.display = 'none';
+
+        appData.vendors.forEach(vendor => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${vendor.name}</strong></td>
+                <td>${vendor.manager || '-'}</td>
+                <td>${vendor.phone || '-'}</td>
+                <td>${vendor.email || '-'}</td>
+                <td>${vendor.address || '-'}</td>
+                <td>
+                    <button class="btn btn-secondary btn-small" onclick="openEditVendorModal(${vendor.id})">수정</button>
+                    <button class="btn btn-danger btn-small" onclick="deleteVendor(${vendor.id})">삭제</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function openEditVendorModal(vendorId) {
+        const vendor = appData.vendors.find(v => v.id === vendorId);
+        if (!vendor) return;
+
+        document.getElementById('editVendorId').value = vendorId;
+        document.getElementById('editVendorName').value = vendor.name;
+        document.getElementById('editVendorManager').value = vendor.manager || '';
+        document.getElementById('editVendorPhone').value = vendor.phone || '';
+        document.getElementById('editVendorEmail').value = vendor.email || '';
+        document.getElementById('editVendorAddress').value = vendor.address || '';
+
+        document.getElementById('editVendorModal').style.display = 'block';
+    }
+
+    function handleEditVendor() {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        try {
+            const vendorId = parseInt(document.getElementById('editVendorId').value);
+            const vendor = appData.vendors.find(v => v.id === vendorId);
+
+            if (vendor) {
+                vendor.name = document.getElementById('editVendorName').value;
+                vendor.manager = document.getElementById('editVendorManager').value;
+                vendor.phone = document.getElementById('editVendorPhone').value;
+                vendor.email = document.getElementById('editVendorEmail').value;
+                vendor.address = document.getElementById('editVendorAddress').value;
+
+                saveDataToStorage();
+                console.log('✓ 업체 수정:', vendor.name);
+                showAlert('vendorAlert', '✓ 업체가 수정되었습니다', 'success');
+                
+                setTimeout(() => {
+                    loadVendors();
+                    closeModal('editVendorModal');
+                    updateVendorSelects();
+                    isProcessing = false;
+                }, 1000);
+            } else {
+                isProcessing = false;
+            }
+        } catch (e) {
+            console.error('❌ 업체 수정 오류:', e);
+            showAlert('vendorAlert', '업체 수정 실패: ' + e.message, 'error');
+            isProcessing = false;
+        }
+    }
+
+    function deleteVendor(vendorId) {
+        if (isProcessing) return;
+
+        if (confirm('업체를 삭제하시겠습니까?')) {
+            isProcessing = true;
+            
+            try {
+                appData.vendors = appData.vendors.filter(v => v.id !== vendorId);
+                appData.products = appData.products.filter(p => p.vendor !== vendorId);
+                saveDataToStorage();
+                
+                console.log('✓ 업체 삭제 완료');
+                showAlert('vendorAlert', '✓ 업체가 삭제되었습니다', 'success');
+                
+                setTimeout(() => {
+                    loadVendors();
+                    loadProducts();
+                    updateVendorSelects();
+                    updateDashboard();
+                    isProcessing = false;
+                }, 1000);
+            } catch (e) {
+                console.error('❌ 업체 삭제 오류:', e);
+                showAlert('vendorAlert', '업체 삭제 실패: ' + e.message, 'error');
+                isProcessing = false;
+            }
+        }
+    }
+
+    // ==================== 설정 (비번 변경) ====================
+    function openSettingsModal() {
+        document.getElementById('settingsModal').style.display = 'block';
+        document.getElementById('settingsForm').reset();
+        document.getElementById('settingsAlert').innerHTML = '';
+    }
+
+    function handleChangePassword() {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const newPasswordConfirm = document.getElementById('newPasswordConfirm').value;
+
+        if (currentPassword !== currentUser.password) {
+            showSettingsAlert('현재 비밀번호가 일치하지 않습니다', 'error');
+            isProcessing = false;
+            return;
+        }
+
+        if (newPassword !== newPasswordConfirm) {
+            showSettingsAlert('새 비밀번호가 일치하지 않습니다', 'error');
+            isProcessing = false;
+            return;
+        }
+
+        if (newPassword.length < 4) {
+            showSettingsAlert('새 비밀번호는 4자 이상이어야 합니다', 'error');
+            isProcessing = false;
+            return;
+        }
+
+        try {
+            currentUser.password = newPassword;
+            const userIndex = appData.users.findIndex(u => u.id === currentUser.id);
+            if (userIndex !== -1) {
+                appData.users[userIndex].password = newPassword;
+            }
+            
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            saveDataToStorage();
+
+            console.log('✓ 비밀번호 변경 완료');
+            showSettingsAlert('✓ 비밀번호가 변경되었습니다', 'success');
+            
+            setTimeout(() => {
+                closeModal('settingsModal');
+                document.getElementById('settingsForm').reset();
+                isProcessing = false;
+            }, 1200);
+        } catch (e) {
+            console.error('❌ 비밀번호 변경 오류:', e);
+            showSettingsAlert('변경 실패: ' + e.message, 'error');
+            isProcessing = false;
+        }
+    }
+
+    // ==================== 대시보드 ====================
+    function updateDashboard() {
+        document.getElementById('productCount').textContent = appData.products.length;
+        document.getElementById('vendorCount').textContent = appData.vendors.length;
+
+        const recentProducts = appData.products.slice().reverse().slice(0, 5);
+        const recentHtml = recentProducts.length > 0 
+            ? recentProducts.map(p => {
+                const priceText = canViewPrice() ? `${parseInt(p.price).toLocaleString()}원` : '****원';
+                return `
+                    <div style="padding: 10px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                        <div><strong>${p.name}</strong> - ${priceText}</div>
+                        <span style="color: #999; font-size: 12px;">등록됨</span>
+                    </div>
+                `;
+            }).join('')
+            : '<div style="text-align: center; color: #999; padding: 20px;">최근 등록된 제품이 없습니다</div>';
+        
+        document.getElementById('recentProducts').innerHTML = recentHtml;
+    }
+
+    // ==================== PDF 다운로드 ====================
+    function downloadProductsPDF() {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        const btn = document.getElementById('downloadPdfBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳ 생성 중...';
+        btn.style.opacity = '0.6';
+        btn.style.pointerEvents = 'none';
+
+        setTimeout(() => {
+            const element = document.getElementById('productTable');
+            const now = new Date();
+            const filename = `우진테크_제품단가표_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.pdf`;
+
+            const opt = {
+                margin: 10,
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = originalText;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                showAlert('productAlert', '✓ PDF가 다운로드되었습니다', 'success');
+                isProcessing = false;
+            }).catch(error => {
+                console.error('❌ PDF 생성 오류:', error);
+                btn.innerHTML = originalText;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                showAlert('productAlert', '⚠ PDF 생성 실패', 'error');
+                isProcessing = false;
+            });
+        }, 500);
+    }
+
+    // ==================== 유틸리티 ====================
+    function updateVendorSelects() {
+        const vendorOptions = '<option value="">선택하세요</option>' + 
+            appData.vendors.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+        
+        document.getElementById('productVendor').innerHTML = vendorOptions;
+        document.getElementById('editProductVendor').innerHTML = vendorOptions;
+    }
+
+    function showAlert(elementId, message, type) {
+        const alertDiv = document.getElementById(elementId);
+        if (alertDiv) {
+            alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertDiv.innerHTML = '';
+            }, 3000);
+        }
+    }
+
+    function showAuthAlert(message, type) {
+        const alertDiv = document.getElementById('authAlert');
+        alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        setTimeout(() => {
+            alertDiv.innerHTML = '';
+        }, 3000);
+    }
+
+    function showSettingsAlert(message, type) {
+        const alertDiv = document.getElementById('settingsAlert');
+        alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        setTimeout(() => {
+            alertDiv.innerHTML = '';
+        }, 3000);
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+
+    // 앱 초기화
+    window.addEventListener('DOMContentLoaded', initializeApp);
+    initializeApp();
+</script>
+
+</body>
+</html>
